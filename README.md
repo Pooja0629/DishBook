@@ -14,10 +14,10 @@ This is the **frontend** of a Recipe Manager application where you can:
 - Smooth scroll experience
 
 ## 🖼️ Screenshot of Main Page
-![Uploading Screenshot (64).png…]()
+![Screenshot (64).png…]()
 
 ## 🖼️ Screenshot of Login Page
-![Uploading Screenshot (65).png…]()
+![Screenshot (65).png…]()
 
 ## 📂 Project Structure
 │── index.html
