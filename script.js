@@ -1,4 +1,5 @@
 const apiUrl = "https://dishbook-backend.up.railway.app/recipes";
+const authUrl = "https://dishbook-backend.up.railway.app/auth"; 
 const recipeForm = document.getElementById("recipeForm");
 const recipesList = document.getElementById("recipesList");
 const searchInput = document.getElementById("searchInput");
@@ -138,4 +139,5 @@ document.addEventListener("click", e => {
 
 
 fetchRecipes();
+
 
