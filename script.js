@@ -1,4 +1,4 @@
-const apiUrl = "http://localhost:5000/recipes";
+const apiUrl = "https://dishbook-backend.up.railway.app/recipes";
 const recipeForm = document.getElementById("recipeForm");
 const recipesList = document.getElementById("recipesList");
 const searchInput = document.getElementById("searchInput");
@@ -138,3 +138,4 @@ document.addEventListener("click", e => {
 
 
 fetchRecipes();
+
