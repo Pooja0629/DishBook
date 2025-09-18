@@ -1,143 +1,111 @@
-const apiUrl = "https://dishbook-backend.up.railway.app/recipes";
-const authUrl = "https://dishbook-backend.up.railway.app/auth"; 
-const recipeForm = document.getElementById("recipeForm");
-const recipesList = document.getElementById("recipesList");
-const searchInput = document.getElementById("searchInput");
-const searchResults = document.getElementById("searchResults");
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
 
-recipeForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const name = document.getElementById("name").value.trim();
-  const ingredients = document.getElementById("ingredients").value.split(",").map(i => i.trim());
-  const steps = document.getElementById("steps").value.trim();
-  const category = document.getElementById("category").value;
+const app = express();
+app.use(express.json());
+app.use(cors());
 
-  if (!name || !ingredients[0] || !steps || !category) return alert("Please fill in all fields!");
+const mongoURL = "mongodb+srv://ReceipeUser:Pooja2906@receipe.hnkhrxa.mongodb.net/recipesDB?retryWrites=true&w=majority";
+mongoose.connect(mongoURL)
+  .then(() => console.log("MongoDB connected ✅"))
+  .catch(err => console.log("MongoDB error:", err));
 
-  const recipe = { name, ingredients, steps, category };
+const recipeSchema = new mongoose.Schema({
+  name: String,
+  ingredients: [String],
+  steps: String,
+  category: String
+});
+const Recipe = mongoose.model("Recipe", recipeSchema);
+
+const userSchema = new mongoose.Schema({
+  username: String,
+  email: String,
+  password: String
+});
+const User = mongoose.model("User", userSchema);
+
+app.post("/signup", async (req, res) => {
   try {
-    const recipeId = recipeForm.dataset.id;
-    if (recipeId) {
-      await fetch(`${apiUrl}/${recipeId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(recipe)
-      });
-      delete recipeForm.dataset.id;
-    } else {
-      await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(recipe)
-      });
-    }
-    recipeForm.reset();
-    fetchRecipes();
+    const { username, email, password } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ message: "User already exists" });
+
+    const newUser = new User({ username, email, password });
+    await newUser.save();
+    res.json({ message: "User registered successfully", user: newUser });
   } catch (err) {
-    console.error("Error:", err);
-    alert("Something went wrong. Check console.");
+    res.status(500).send(err);
   }
 });
 
-async function fetchRecipes() {
+app.post("/login", async (req, res) => {
   try {
-    const res = await fetch(apiUrl);
-    const recipes = await res.json();
-    recipesList.innerHTML = "";
-    recipes.forEach(r => {
-      const div = document.createElement("div");
-      div.className = "col-md-4"; 
-      div.id = `recipe-${r._id}`;
-      div.innerHTML = `
-        <div class="recipe-card card p-3 h-100">
-          <h5 class="card-title">${r.name}</h5>
-          <p><strong>Category:</strong> ${r.category}</p>
-          <p><strong>Ingredients:</strong> ${r.ingredients.join(", ")}</p>
-          <p><strong>Steps:</strong> ${r.steps.substring(0, 50)}...</p>
-          <div class="d-flex">
-            <button class="btn btn-sm btn-outline-secondary me-2" onclick="editRecipe('${r._id}')">Update</button>
-            <button class="btn btn-sm btn-outline-danger" onclick="deleteRecipe('${r._id}')">Delete</button>
-          </div>
-        </div>
-      `;
-      recipesList.appendChild(div);
-    });
+    const { email, password } = req.body;
+    const user = await User.findOne({ email, password });
+    if (!user) return res.status(400).json({ message: "Invalid email or password" });
+
+    res.json({ message: `Welcome back, ${user.username}!`, user });
   } catch (err) {
-    console.error("Error fetching recipes:", err);
-    recipesList.innerHTML = "<p class='text-danger'>Unable to load recipes.</p>";
-  }
-}
-
-
-async function deleteRecipe(id) {
-  if (!confirm("Are you sure you want to delete this recipe?")) return;
-  try {
-    await fetch(`${apiUrl}/${id}`, { method: "DELETE" });
-    fetchRecipes();
-  } catch (err) {
-    console.error("Error deleting recipe:", err);
-    alert("Failed to delete recipe.");
-  }
-}
-
-
-async function editRecipe(id) {
-  try {
-    const res = await fetch(`${apiUrl}/${id}`);
-    const r = await res.json();
-    document.getElementById("name").value = r.name;
-    document.getElementById("ingredients").value = r.ingredients.join(", ");
-    document.getElementById("steps").value = r.steps;
-    document.getElementById("category").value = r.category;
-    recipeForm.dataset.id = id;
-  } catch (err) {
-    console.error("Error editing recipe:", err);
-    alert("Failed to fetch recipe for editing.");
-  }
-}
-
-searchInput.addEventListener("input", async () => {
-  const query = searchInput.value.trim().toLowerCase();
-  searchResults.innerHTML = "";
-  if (!query) return;
-
-  try {
-    const res = await fetch(apiUrl);
-    const recipes = await res.json();
-
-    recipes.filter(r => r.name.toLowerCase().includes(query))
-      .forEach(r => {
-        const item = document.createElement("button");
-        item.type = "button";
-        item.className = "list-group-item list-group-item-action";
-        item.textContent = r.name;
-
-        item.addEventListener("click", () => {
-          searchInput.value = "";
-          searchResults.innerHTML = "";
-
-          const card = document.getElementById(`recipe-${r._id}`);
-          if (card) {
-            card.scrollIntoView({ behavior: "smooth", block: "start" });
-            card.classList.add("highlight");
-            setTimeout(() => card.classList.remove("highlight"), 2000);
-          }
-        });
-
-        searchResults.appendChild(item);
-      });
-  } catch (err) {
-    console.error("Error fetching recipes:", err);
+    res.status(500).send(err);
   }
 });
 
-document.addEventListener("click", e => {
-  if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
-    searchResults.innerHTML = "";
+app.post("/recipes", async (req, res) => {
+  try {
+    const recipe = new Recipe(req.body);
+    await recipe.save();
+    res.json(recipe);
+  } catch (err) {
+    res.status(500).json({ message: "Error saving recipe", error: err });
   }
 });
 
+app.get("/recipes", async (req, res) => {
+  try {
+    const recipes = await Recipe.find();
+    res.json(recipes);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching recipes", error: err });
+  }
+});
 
-fetchRecipes();
+app.get("/recipes/:id", async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id);
+    if (!recipe) return res.status(404).json({ message: "Recipe not found" });
+    res.json(recipe);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching recipe", error: err });
+  }
+});
 
+app.put("/recipes/:id", async (req, res) => {
+  try {
+    const updated = await Recipe.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ message: "Recipe not found" });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: "Error updating recipe", error: err });
+  }
+});
 
+app.delete("/recipes/:id", async (req, res) => {
+  try {
+    const deleted = await Recipe.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Recipe not found" });
+    res.json({ message: "Recipe deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting recipe", error: err });
+  }
+});
+
+app.get("/", (req, res) => {
+  res.send("Backend is running ✅");
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
