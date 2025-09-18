@@ -1,8 +1,10 @@
 const BACKEND_URL = "https://dishbook-backend-production.up.railway.app";
-
 let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
 
+const loggedInUserNameSpan = document.getElementById("loggedInUserName");
 if (loggedInUser) {
+  loggedInUserNameSpan.textContent = `Hello, ${loggedInUser.username}`;
+  document.getElementById("loginLink").style.display = "none";
   fetchRecipes();
 } else if (window.location.pathname.includes("index.html")) {
   alert("Please login first!");
@@ -11,7 +13,6 @@ if (loggedInUser) {
 
 async function signup(event) {
   event.preventDefault();
-
   const username = document.getElementById("signupUsername").value;
   const email = document.getElementById("signupEmail").value;
   const password = document.getElementById("signupPassword").value;
@@ -22,10 +23,8 @@ async function signup(event) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password })
     });
-
     const data = await res.json();
     alert(data.message);
-
     if (res.ok) {
       loggedInUser = data.user;
       localStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
@@ -39,7 +38,6 @@ async function signup(event) {
 
 async function login(event) {
   event.preventDefault();
-
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
 
@@ -49,17 +47,13 @@ async function login(event) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
     });
-
     const data = await res.json();
-
     if (!res.ok) {
       alert(data.message);
       return;
     }
-
     loggedInUser = data.user;
     localStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
-    alert(data.message);
     window.location.href = "index.html";
   } catch (err) {
     console.error(err);
@@ -69,31 +63,21 @@ async function login(event) {
 
 async function addRecipe(event) {
   event.preventDefault();
-
   if (!loggedInUser) {
     alert("Please login first!");
     return;
   }
-
-const name = document.getElementById("name").value;
-const ingredients = document.getElementById("ingredients").value.split(",");
-const steps = document.getElementById("steps").value;
-const category = document.getElementById("category").value;
-
+  const name = document.getElementById("recipeName").value;
+  const ingredients = document.getElementById("recipeIngredients").value.split(",");
+  const steps = document.getElementById("recipeSteps").value;
+  const category = document.getElementById("recipeCategory").value;
 
   try {
     const res = await fetch(`${BACKEND_URL}/recipes`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        ingredients,
-        steps,
-        category,
-        userEmail: loggedInUser.email
-      })
+      body: JSON.stringify({ name, ingredients, steps, category, userEmail: loggedInUser.email })
     });
-
     const data = await res.json();
     alert("Recipe added successfully!");
     document.getElementById("recipeForm").reset();
@@ -106,15 +90,12 @@ const category = document.getElementById("category").value;
 
 async function fetchRecipes() {
   if (!loggedInUser) return;
-
   try {
     const res = await fetch(`${BACKEND_URL}/recipes/${loggedInUser.email}`);
     const recipes = await res.json();
-
     const recipeList = document.getElementById("recipeList");
     recipeList.innerHTML = "";
-
-    recipes.forEach((recipe) => {
+    recipes.forEach(recipe => {
       const li = document.createElement("li");
       li.innerHTML = `
         <strong>${recipe.name}</strong> (${recipe.category})<br>
@@ -129,7 +110,6 @@ async function fetchRecipes() {
   }
 }
 
-document.getElementById("signupForm").addEventListener("submit", signup);
-document.getElementById("loginForm").addEventListener("submit", login);
-document.getElementById("recipeForm").addEventListener("submit", addRecipe);
-
+document.getElementById("signupForm")?.addEventListener("submit", signup);
+document.getElementById("loginForm")?.addEventListener("submit", login);
+document.getElementById("recipeForm")?.addEventListener("submit", addRecipe);
