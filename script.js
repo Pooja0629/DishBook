@@ -1,5 +1,13 @@
 const BACKEND_URL = "https://dishbook-backend-production.up.railway.app";
-let loggedInUser = null; 
+
+let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+
+if (loggedInUser) {
+  fetchRecipes();
+} else if (window.location.pathname.includes("index.html")) {
+  alert("Please login first!");
+  window.location.href = "login.html";
+}
 
 async function signup(event) {
   event.preventDefault();
@@ -19,7 +27,9 @@ async function signup(event) {
     alert(data.message);
 
     if (res.ok) {
-      document.getElementById("signupForm").reset();
+      loggedInUser = data.user;
+      localStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
+      window.location.href = "index.html";
     }
   } catch (err) {
     console.error(err);
@@ -27,7 +37,6 @@ async function signup(event) {
   }
 }
 
-// -------------------- Login --------------------
 async function login(event) {
   event.preventDefault();
 
@@ -48,10 +57,10 @@ async function login(event) {
       return;
     }
 
-    loggedInUser = data.user; 
+    loggedInUser = data.user;
+    localStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
     alert(data.message);
-    
-    fetchRecipes();
+    window.location.href = "index.html";
   } catch (err) {
     console.error(err);
     alert("Login failed!");
@@ -87,13 +96,12 @@ async function addRecipe(event) {
     const data = await res.json();
     alert("Recipe added successfully!");
     document.getElementById("recipeForm").reset();
-    fetchRecipes(); 
+    fetchRecipes();
   } catch (err) {
     console.error(err);
     alert("Error adding recipe!");
   }
 }
-
 
 async function fetchRecipes() {
   if (!loggedInUser) return;
