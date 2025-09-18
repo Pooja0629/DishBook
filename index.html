@@ -33,9 +33,18 @@
 
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
-          <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="login.html" id="loginLink">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">About</a>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link" id="loggedInUserName" style="color:black;"></span>
+          </li>
         </ul>
       </div>
     </div>
@@ -79,11 +88,11 @@
   </div>
 
   <div class="container mt-5">
-    <h3 class="mb-4">All Recipes</h3>
+    <h3 class="mb-4">Your Recipes</h3>
     <div id="recipeList" class="row"></div>
   </div>
 
-  <footer class=" text-black text-center py-3 mt-5" style="background-color: #be8d85">
+  <footer class="text-black text-center py-3 mt-5" style="background-color: #be8d85">
     <p>&copy; 2025 DishBook. All rights reserved.</p>
   </footer>
 
