@@ -75,10 +75,11 @@ async function addRecipe(event) {
     return;
   }
 
-  const name = document.getElementById("recipeName").value;
-  const ingredients = document.getElementById("recipeIngredients").value.split(",");
-  const steps = document.getElementById("recipeSteps").value;
-  const category = document.getElementById("recipeCategory").value;
+const name = document.getElementById("name").value;
+const ingredients = document.getElementById("ingredients").value.split(",");
+const steps = document.getElementById("steps").value;
+const category = document.getElementById("category").value;
+
 
   try {
     const res = await fetch(`${BACKEND_URL}/recipes`, {
@@ -131,3 +132,4 @@ async function fetchRecipes() {
 document.getElementById("signupForm").addEventListener("submit", signup);
 document.getElementById("loginForm").addEventListener("submit", login);
 document.getElementById("recipeForm").addEventListener("submit", addRecipe);
+
