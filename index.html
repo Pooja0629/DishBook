@@ -8,7 +8,6 @@
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/5402/5402751.png">
   <link href="style.css" rel="stylesheet">
   <style>
-   
     #searchResults {
       position: absolute;
       z-index: 1000;
@@ -26,7 +25,6 @@
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
-
 
       <div class="container mt-4 position-relative">
         <input type="text" id="searchInput" class="form-control" placeholder="Search recipes by name...">
@@ -55,16 +53,16 @@
           <h2 class="mb-3">Add Recipe</h2>
           <form id="recipeForm">
             <div class="mb-3">
-              <input type="text" id="name" class="form-control" placeholder="Recipe Name">
+              <input type="text" id="recipeName" class="form-control" placeholder="Recipe Name">
             </div>
             <div class="mb-3">
-              <input type="text" id="ingredients" class="form-control" placeholder="Ingredients, comma separated">
+              <input type="text" id="recipeIngredients" class="form-control" placeholder="Ingredients, comma separated">
             </div>
             <div class="mb-3">
-              <textarea id="steps" class="form-control" placeholder="Steps"></textarea>
+              <textarea id="recipeSteps" class="form-control" placeholder="Steps"></textarea>
             </div>
             <div class="mb-3">
-              <select id="category" class="form-select">
+              <select id="recipeCategory" class="form-select">
                 <option value="">Select Category</option>
                 <option value="Veg">Veg</option>
                 <option value="Non-Veg">Non-Veg</option>
@@ -82,10 +80,10 @@
 
   <div class="container mt-5">
     <h3 class="mb-4">All Recipes</h3>
-    <div id="recipesList" class="row"></div>
+    <div id="recipeList" class="row"></div>
   </div>
 
-  <footer class=" text-black text-center py-3 mt-5" style="background-color: #be8d85" >
+  <footer class=" text-black text-center py-3 mt-5" style="background-color: #be8d85">
     <p>&copy; 2025 DishBook. All rights reserved.</p>
   </footer>
 
@@ -93,4 +91,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
