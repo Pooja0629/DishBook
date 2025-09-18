@@ -1,111 +1,129 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
+// -------------------- Global Variables --------------------
+let loggedInUser = null; // Stores the logged-in user's info
 
-const app = express();
-app.use(express.json());
-app.use(cors());
+// -------------------- Signup --------------------
+async function signup(event) {
+  event.preventDefault();
 
-const mongoURL = "mongodb+srv://ReceipeUser:Pooja2906@receipe.hnkhrxa.mongodb.net/recipesDB?retryWrites=true&w=majority";
-mongoose.connect(mongoURL)
-  .then(() => console.log("MongoDB connected ✅"))
-  .catch(err => console.log("MongoDB error:", err));
+  const username = document.getElementById("signupUsername").value;
+  const email = document.getElementById("signupEmail").value;
+  const password = document.getElementById("signupPassword").value;
 
-const recipeSchema = new mongoose.Schema({
-  name: String,
-  ingredients: [String],
-  steps: String,
-  category: String
-});
-const Recipe = mongoose.model("Recipe", recipeSchema);
-
-const userSchema = new mongoose.Schema({
-  username: String,
-  email: String,
-  password: String
-});
-const User = mongoose.model("User", userSchema);
-
-app.post("/signup", async (req, res) => {
   try {
-    const { username, email, password } = req.body;
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: "User already exists" });
+    const res = await fetch("https://your-backend-url/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password })
+    });
 
-    const newUser = new User({ username, email, password });
-    await newUser.save();
-    res.json({ message: "User registered successfully", user: newUser });
+    const data = await res.json();
+    alert(data.message);
+
+    if (res.ok) {
+      document.getElementById("signupForm").reset();
+    }
   } catch (err) {
-    res.status(500).send(err);
+    console.error(err);
+    alert("Signup failed!");
   }
-});
+}
 
-app.post("/login", async (req, res) => {
+// -------------------- Login --------------------
+async function login(event) {
+  event.preventDefault();
+
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email, password });
-    if (!user) return res.status(400).json({ message: "Invalid email or password" });
+    const res = await fetch("https://your-backend-url/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-    res.json({ message: `Welcome back, ${user.username}!`, user });
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message);
+      return;
+    }
+
+    loggedInUser = data.user; // Save logged-in user info
+    alert(data.message);
+
+    // Fetch the user's recipes
+    fetchRecipes();
   } catch (err) {
-    res.status(500).send(err);
+    console.error(err);
+    alert("Login failed!");
   }
-});
+}
 
-app.post("/recipes", async (req, res) => {
+// -------------------- Add Recipe --------------------
+async function addRecipe(event) {
+  event.preventDefault();
+
+  if (!loggedInUser) {
+    alert("Please login first!");
+    return;
+  }
+
+  const name = document.getElementById("recipeName").value;
+  const ingredients = document.getElementById("recipeIngredients").value.split(",");
+  const steps = document.getElementById("recipeSteps").value;
+  const category = document.getElementById("recipeCategory").value;
+
   try {
-    const recipe = new Recipe(req.body);
-    await recipe.save();
-    res.json(recipe);
-  } catch (err) {
-    res.status(500).json({ message: "Error saving recipe", error: err });
-  }
-});
+    const res = await fetch("https://your-backend-url/recipes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        ingredients,
+        steps,
+        category,
+        userEmail: loggedInUser.email // Link recipe to user
+      })
+    });
 
-app.get("/recipes", async (req, res) => {
+    const data = await res.json();
+    alert("Recipe added successfully!");
+    document.getElementById("recipeForm").reset();
+    fetchRecipes(); // Refresh recipe list
+  } catch (err) {
+    console.error(err);
+    alert("Error adding recipe!");
+  }
+}
+
+// -------------------- Fetch User Recipes --------------------
+async function fetchRecipes() {
+  if (!loggedInUser) return;
+
   try {
-    const recipes = await Recipe.find();
-    res.json(recipes);
+    const res = await fetch(`https://your-backend-url/recipes/${loggedInUser.email}`);
+    const recipes = await res.json();
+
+    const recipeList = document.getElementById("recipeList");
+    recipeList.innerHTML = "";
+
+    recipes.forEach((recipe) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <strong>${recipe.name}</strong> (${recipe.category})<br>
+        Ingredients: ${recipe.ingredients.join(", ")}<br>
+        Steps: ${recipe.steps}<br>
+      `;
+      recipeList.appendChild(li);
+    });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching recipes", error: err });
+    console.error(err);
+    alert("Error fetching recipes!");
   }
-});
+}
 
-app.get("/recipes/:id", async (req, res) => {
-  try {
-    const recipe = await Recipe.findById(req.params.id);
-    if (!recipe) return res.status(404).json({ message: "Recipe not found" });
-    res.json(recipe);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching recipe", error: err });
-  }
-});
-
-app.put("/recipes/:id", async (req, res) => {
-  try {
-    const updated = await Recipe.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updated) return res.status(404).json({ message: "Recipe not found" });
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ message: "Error updating recipe", error: err });
-  }
-});
-
-app.delete("/recipes/:id", async (req, res) => {
-  try {
-    const deleted = await Recipe.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: "Recipe not found" });
-    res.json({ message: "Recipe deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Error deleting recipe", error: err });
-  }
-});
-
-app.get("/", (req, res) => {
-  res.send("Backend is running ✅");
-});
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// -------------------- Event Listeners --------------------
+document.getElementById("signupForm").addEventListener("submit", signup);
+document.getElementById("loginForm").addEventListener("submit", login);
+document.getElementById("recipeForm").addEventListener("submit", addRecipe);
