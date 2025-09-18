@@ -12,11 +12,9 @@ if (loggedInUser) {
 async function signup(event) {
   event.preventDefault();
 
-  const username = document.getElementById("signupUsername")?.value;
-  const email = document.getElementById("signupEmail")?.value;
-  const password = document.getElementById("signupPassword")?.value;
-
-  if (!username || !email || !password) return;
+  const username = document.getElementById("signupUsername").value;
+  const email = document.getElementById("signupEmail").value;
+  const password = document.getElementById("signupPassword").value;
 
   try {
     const res = await fetch(`${BACKEND_URL}/signup`, {
@@ -42,10 +40,8 @@ async function signup(event) {
 async function login(event) {
   event.preventDefault();
 
-  const email = document.getElementById("loginEmail")?.value;
-  const password = document.getElementById("loginPassword")?.value;
-
-  if (!email || !password) return;
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
 
   try {
     const res = await fetch(`${BACKEND_URL}/login`, {
@@ -79,15 +75,10 @@ async function addRecipe(event) {
     return;
   }
 
-  const name = document.getElementById("name").value;
-  const ingredients = document.getElementById("ingredients").value.split(",");
-  const steps = document.getElementById("steps").value;
-  const category = document.getElementById("category").value;
-
-  if (!name || !ingredients.length || !steps || !category) {
-    alert("Please fill all fields!");
-    return;
-  }
+  const name = document.getElementById("recipeName").value;
+  const ingredients = document.getElementById("recipeIngredients").value.split(",");
+  const steps = document.getElementById("recipeSteps").value;
+  const category = document.getElementById("recipeCategory").value;
 
   try {
     const res = await fetch(`${BACKEND_URL}/recipes`, {
@@ -119,27 +110,58 @@ async function fetchRecipes() {
     const res = await fetch(`${BACKEND_URL}/recipes/${loggedInUser.email}`);
     const recipes = await res.json();
 
-    const recipeList = document.getElementById("recipesList");
+    const recipeList = document.getElementById("recipeList");
     recipeList.innerHTML = "";
 
     recipes.forEach((recipe) => {
-      const div = document.createElement("div");
-      div.className = "col-md-4 mb-3";
-      div.innerHTML = `
-        <div class="card p-3 shadow-sm">
-          <h5>${recipe.name}</h5>
-          <p><strong>Category:</strong> ${recipe.category}</p>
-          <p><strong>Ingredients:</strong> ${recipe.ingredients.join(", ")}</p>
-          <p><strong>Steps:</strong> ${recipe.steps}</p>
-        </div>
+      const li = document.createElement("li");
+      li.className = "card p-3 mb-3"; // Bootstrap card style
+      li.innerHTML = `
+        <strong>${recipe.name}</strong> (${recipe.category})<br>
+        Ingredients: ${recipe.ingredients.join(", ")}<br>
+        Steps: ${recipe.steps}<br>
       `;
-      recipeList.appendChild(div);
+      recipeList.appendChild(li);
     });
   } catch (err) {
     console.error(err);
     alert("Error fetching recipes!");
   }
 }
+
+// Show logged-in user in navbar
+function showLoggedInUser() {
+  const navbarUser = document.getElementById("navbarUser");
+  navbarUser.innerHTML = "";
+
+  if (loggedInUser) {
+    const liUser = document.createElement("li");
+    liUser.className = "nav-item dropdown";
+
+    liUser.innerHTML = `
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+        ${loggedInUser.username}
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="#" id="logoutBtn">Logout</a></li>
+      </ul>
+    `;
+
+    navbarUser.appendChild(liUser);
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("loggedInUser");
+      loggedInUser = null;
+      window.location.href = "login.html";
+    });
+  } else {
+    navbarUser.innerHTML = `
+      <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
+    `;
+  }
+}
+
+showLoggedInUser();
 
 document.getElementById("signupForm")?.addEventListener("submit", signup);
 document.getElementById("loginForm")?.addEventListener("submit", login);
