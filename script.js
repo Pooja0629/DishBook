@@ -1,6 +1,7 @@
 const BACKEND_URL = "https://dishbook-backend-production.up.railway.app";
 
 let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+let allRecipes = [];
 
 if (loggedInUser) {
   fetchRecipes();
@@ -9,6 +10,7 @@ if (loggedInUser) {
   window.location.href = "login.html";
 }
 
+// -------------------- Signup --------------------
 async function signup(event) {
   event.preventDefault();
 
@@ -37,6 +39,7 @@ async function signup(event) {
   }
 }
 
+// -------------------- Login --------------------
 async function login(event) {
   event.preventDefault();
 
@@ -67,6 +70,7 @@ async function login(event) {
   }
 }
 
+// -------------------- Add Recipe --------------------
 async function addRecipe(event) {
   event.preventDefault();
 
@@ -103,66 +107,94 @@ async function addRecipe(event) {
   }
 }
 
+// -------------------- Fetch Recipes --------------------
 async function fetchRecipes() {
   if (!loggedInUser) return;
 
   try {
     const res = await fetch(`${BACKEND_URL}/recipes/${loggedInUser.email}`);
-    const recipes = await res.json();
-
-    const recipeList = document.getElementById("recipeList");
-    recipeList.innerHTML = "";
-
-    recipes.forEach((recipe) => {
-      const li = document.createElement("li");
-      li.className = "card p-3 mb-3"; // Bootstrap card style
-      li.innerHTML = `
-        <strong>${recipe.name}</strong> (${recipe.category})<br>
-        Ingredients: ${recipe.ingredients.join(", ")}<br>
-        Steps: ${recipe.steps}<br>
-      `;
-      recipeList.appendChild(li);
-    });
+    allRecipes = await res.json();
+    renderRecipes(allRecipes);
   } catch (err) {
     console.error(err);
     alert("Error fetching recipes!");
   }
 }
 
-// Show logged-in user in navbar
-function showLoggedInUser() {
-  const navbarUser = document.getElementById("navbarUser");
-  navbarUser.innerHTML = "";
+// -------------------- Render Recipes --------------------
+function renderRecipes(recipes) {
+  const recipeList = document.getElementById("recipeList");
+  recipeList.innerHTML = "";
 
-  if (loggedInUser) {
-    const liUser = document.createElement("li");
-    liUser.className = "nav-item dropdown";
+  recipes.forEach((recipe) => {
+    const col = document.createElement("div");
+    col.className = "col-md-4 mb-3";
 
-    liUser.innerHTML = `
-      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-        ${loggedInUser.username}
-      </a>
-      <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="#" id="logoutBtn">Logout</a></li>
-      </ul>
+    col.innerHTML = `
+      <div class="card p-3 shadow-sm">
+        <h5>${recipe.name}</h5>
+        <p><strong>Category:</strong> ${recipe.category}</p>
+        <p><strong>Ingredients:</strong> ${recipe.ingredients.join(", ")}</p>
+        <p><strong>Steps:</strong> ${recipe.steps}</p>
+        <button class="btn btn-warning btn-sm me-2" onclick='updateRecipe("${recipe._id}")'>Update</button>
+        <button class="btn btn-danger btn-sm" onclick='deleteRecipe("${recipe._id}")'>Delete</button>
+      </div>
     `;
 
-    navbarUser.appendChild(liUser);
+    recipeList.appendChild(col);
+  });
+}
 
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.removeItem("loggedInUser");
-      loggedInUser = null;
-      window.location.href = "login.html";
-    });
-  } else {
-    navbarUser.innerHTML = `
-      <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
-    `;
+// -------------------- Delete Recipe --------------------
+async function deleteRecipe(id) {
+  if (!confirm("Are you sure you want to delete this recipe?")) return;
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/recipes/${id}`, { method: "DELETE" });
+    const data = await res.json();
+    alert(data.message);
+    fetchRecipes();
+  } catch (err) {
+    console.error(err);
+    alert("Error deleting recipe!");
   }
 }
 
-showLoggedInUser();
+// -------------------- Update Recipe --------------------
+async function updateRecipe(id) {
+  const recipe = allRecipes.find(r => r._id === id);
+  if (!recipe) return;
 
+  const name = prompt("Enter new recipe name:", recipe.name) || recipe.name;
+  const ingredients = prompt("Enter ingredients (comma separated):", recipe.ingredients.join(",")) || recipe.ingredients.join(",");
+  const steps = prompt("Enter steps:", recipe.steps) || recipe.steps;
+  const category = prompt("Enter category (Veg/Non-Veg):", recipe.category) || recipe.category;
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/recipes/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, ingredients: ingredients.split(","), steps, category })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+    fetchRecipes();
+  } catch (err) {
+    console.error(err);
+    alert("Error updating recipe!");
+  }
+}
+
+// -------------------- Search Recipes --------------------
+const searchInput = document.getElementById("searchInput");
+searchInput.addEventListener("input", () => {
+  const query = searchInput.value.toLowerCase();
+  const filtered = allRecipes.filter(r => r.name.toLowerCase().includes(query));
+  renderRecipes(filtered);
+});
+
+// -------------------- Event Listeners --------------------
 document.getElementById("signupForm")?.addEventListener("submit", signup);
 document.getElementById("loginForm")?.addEventListener("submit", login);
 document.getElementById("recipeForm")?.addEventListener("submit", addRecipe);
