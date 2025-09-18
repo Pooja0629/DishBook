@@ -1,7 +1,6 @@
-// -------------------- Global Variables --------------------
-let loggedInUser = null; // Stores the logged-in user's info
+const BACKEND_URL = "https://dishbook-backend-production.up.railway.app";
+let loggedInUser = null; 
 
-// -------------------- Signup --------------------
 async function signup(event) {
   event.preventDefault();
 
@@ -10,7 +9,7 @@ async function signup(event) {
   const password = document.getElementById("signupPassword").value;
 
   try {
-    const res = await fetch("https://your-backend-url/signup", {
+    const res = await fetch(`${BACKEND_URL}/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password })
@@ -36,7 +35,7 @@ async function login(event) {
   const password = document.getElementById("loginPassword").value;
 
   try {
-    const res = await fetch("https://your-backend-url/login", {
+    const res = await fetch(`${BACKEND_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
@@ -49,10 +48,9 @@ async function login(event) {
       return;
     }
 
-    loggedInUser = data.user; // Save logged-in user info
+    loggedInUser = data.user; 
     alert(data.message);
-
-    // Fetch the user's recipes
+    
     fetchRecipes();
   } catch (err) {
     console.error(err);
@@ -60,7 +58,6 @@ async function login(event) {
   }
 }
 
-// -------------------- Add Recipe --------------------
 async function addRecipe(event) {
   event.preventDefault();
 
@@ -75,7 +72,7 @@ async function addRecipe(event) {
   const category = document.getElementById("recipeCategory").value;
 
   try {
-    const res = await fetch("https://your-backend-url/recipes", {
+    const res = await fetch(`${BACKEND_URL}/recipes`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -83,26 +80,26 @@ async function addRecipe(event) {
         ingredients,
         steps,
         category,
-        userEmail: loggedInUser.email // Link recipe to user
+        userEmail: loggedInUser.email
       })
     });
 
     const data = await res.json();
     alert("Recipe added successfully!");
     document.getElementById("recipeForm").reset();
-    fetchRecipes(); // Refresh recipe list
+    fetchRecipes(); 
   } catch (err) {
     console.error(err);
     alert("Error adding recipe!");
   }
 }
 
-// -------------------- Fetch User Recipes --------------------
+
 async function fetchRecipes() {
   if (!loggedInUser) return;
 
   try {
-    const res = await fetch(`https://your-backend-url/recipes/${loggedInUser.email}`);
+    const res = await fetch(`${BACKEND_URL}/recipes/${loggedInUser.email}`);
     const recipes = await res.json();
 
     const recipeList = document.getElementById("recipeList");
@@ -123,7 +120,6 @@ async function fetchRecipes() {
   }
 }
 
-// -------------------- Event Listeners --------------------
 document.getElementById("signupForm").addEventListener("submit", signup);
 document.getElementById("loginForm").addEventListener("submit", login);
 document.getElementById("recipeForm").addEventListener("submit", addRecipe);
