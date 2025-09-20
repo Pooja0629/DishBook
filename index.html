@@ -3,87 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DishBook</title>
+  <title>Recipe Collection App</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/5402/5402751.png">
-  <link href="style.css" rel="stylesheet">
-  <style>
-    #searchResults {
-      position: absolute;
-      z-index: 1000;
-      width: 100%;
-      max-height: 250px;
-      overflow-y: auto;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <nav class="navbar navbar-expand-lg text-white" style="background-color: #D9A299;">
-    <div class="container">
-      <a class="navbar-brand" href="#">DishBook 📖</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="container mt-4 position-relative">
-        <input type="text" id="searchInput" class="form-control" placeholder="Search recipes by name...">
-        <div id="searchResults" class="list-group"></div>
-      </div>
-
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto" id="navbarUser">
-          <!-- Dynamic user info will appear here -->
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <div class="hero-section mb-4 text-center">
-    <h1>Recipe Vault</h1>
-    <p>Manage your favorite recipes easily</p>
-  </div>
-
   <div class="container mt-5">
-    <div class="row align-items-center">
-      <div class="col-md-6">
-        <div class="card p-4 shadow-sm">
-          <h2 class="mb-3">Add Recipe</h2>
-          <form id="recipeForm">
-            <div class="mb-3">
-              <input type="text" id="recipeName" class="form-control" placeholder="Recipe Name">
-            </div>
-            <div class="mb-3">
-              <input type="text" id="recipeIngredients" class="form-control" placeholder="Ingredients, comma separated">
-            </div>
-            <div class="mb-3">
-              <textarea id="recipeSteps" class="form-control" placeholder="Steps"></textarea>
-            </div>
-            <div class="mb-3">
-              <select id="recipeCategory" class="form-select">
-                <option value="">Select Category</option>
-                <option value="Veg">Veg</option>
-                <option value="Non-Veg">Non-Veg</option>
-              </select>
-            </div>
-            <button type="submit" class="btn btn-success w-100" style="background-color: #d6958b; color :black">Add Recipe</button>
-          </form>
+    <h1 class="text-center mb-4">Recipe Collection App</h1>
+
+    <div class="card p-4 mb-5">
+      <h3>Add Recipe</h3>
+      <form id="recipeForm">
+        <div class="mb-3">
+          <input type="text" id="name" class="form-control" placeholder="Recipe Name" required>
         </div>
-      </div>
-      <div class="col-md-6 text-center">
-        <img src="recipe-image.jpg" class="img-fluid rounded shadow" alt="Cooking" style="max-height: 400px;">
-      </div>
+        <div class="mb-3">
+          <textarea id="ingredients" class="form-control" placeholder="Ingredients (comma separated)" required></textarea>
+        </div>
+        <div class="mb-3">
+          <textarea id="steps" class="form-control" placeholder="Steps" required></textarea>
+        </div>
+        <div class="mb-3">
+          <select id="category" class="form-select" required>
+            <option value="">Select Category</option>
+            <option value="Veg">Veg</option>
+            <option value="Non-Veg">Non-Veg</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Recipe</button>
+      </form>
     </div>
-  </div>
 
-  <div class="container mt-5">
-    <h3 class="mb-4">All Recipes</h3>
-    <div id="recipeList" class="row"></div>
+    <h3>All Recipes</h3>
+    <div id="recipesList" class="row"></div>
   </div>
-
-  <footer class="text-black text-center py-3 mt-5" style="background-color: #be8d85">
-    <p>&copy; 2025 DishBook. All rights reserved.</p>
-  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="script.js"></script>
