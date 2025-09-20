@@ -1,41 +1,18 @@
 body {
-  background-color: #FAF7F3;
+  background-color: #f8f9fa;
   font-family: Arial, sans-serif;
 }
 
 .card {
-  background-color: #F0E4D3;
+  background-color: #ffffff;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
 }
 
 .recipe-card {
-  background-color: #F0E4D3;
+  background-color: #ffffff;
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 15px;
   box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
-}
-
-.h3 {
-  text-align: left; 
-}
-.hero-section {
-  background-color: #DCC5B2;
-  color: #212529;
-  padding: 20px 20px;
-  text-align: center;
-}
-.hero-section h1 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-.hero-section p {
-  margin-bottom: 0;
-  font-size: 1rem;
-}
-.highlight {
-  border: 2px solid black;
-  background-color: #fff8e1;
-  padding: 0%;
 }
